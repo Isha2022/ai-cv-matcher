@@ -1,0 +1,42 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environment variables
+.env
+*.env
+
+# Streamlit specific
+.streamlit/
+
+# Jupyter (if you use it later)
+.ipynb_checkpoints/
+
+# macOS / Windows cruft
+.DS_Store
+Thumbs.db
