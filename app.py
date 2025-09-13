@@ -43,7 +43,7 @@ def extract_skills_ai(text: str, source: str = "cv"):
             '"skills": [],'
             '"tools": [],'
             '"domains": [],'
-            '"seniority": "intern|junior|mid|senior|unknown",'
+            '"seniority": "intern|junior|mid-level|senior|unknown",'
             '"suggestions": []'
             "}"
             "Definitions: "
@@ -234,34 +234,43 @@ if analyze:
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.subheader("CV (normalized)")
-        st.write("**Skills:** " + (", ".join(cv_data["skills"]) or "(none)"))
-        st.write("**Tools:** "  + (", ".join(cv_data["tools"])  or "(none)"))
-        st.write("**Domains:** "  + (", ".join(cv_data["domains"])  or "(none)"))
+        st.subheader("CV (normalised):")
+        st.badge("**Skills:** ")
+        st.write("\n".join([f"- {s}" for s in cv_data["skills"]]) or "(none)")
+        st.badge("**Tools:** ", color="red")
+        st.write("\n".join([f"- {s}" for s in cv_data["tools"]]) or "(none)")        
+        st.badge("**Domains:** ", color="violet")
+        st.write("\n".join([f"- {s}" for s in cv_data["domains"]]) or "(none)")
 
     with c2:
-        st.subheader("JD (normalized)")
-        st.write("**Skills:** " + (", ".join(jd_data["skills"]) or "(none)"))
-        st.write("**Tools:** "  + (", ".join(jd_data["tools"])  or "(none)"))
-        st.write("**Domains:** "  + (", ".join(jd_data["domains"])  or "(none)"))
+        st.subheader("JD (normalised):")
+        st.badge("**Skills** ")
+        st.write("\n".join([f"- {s}" for s in jd_data["skills"]]) or "(none)")
+        st.badge("**Tools:** ", color="red")
+        st.write("\n".join([f"- {s}" for s in jd_data["tools"]]) or "(none)")        
+        st.badge("**Domains:** ", color="violet")
+        st.write("\n".join([f"- {s}" for s in jd_data["domains"]]) or "(none)")
         st.caption(f"Seniority (JD): **{jd_data.get('seniority','unknown')}**")
+    
     with c3:
-        st.subheader("Suggestions")
+        st.subheader("Suggestions:")
         sugg = jd_data.get("suggestions", [])
         if missing and len(sugg) < 3:
             # Add deterministic suggestions from top missing items
-            take = ", ".join(missing[:5])
-            sugg = sugg + [f"Add concrete bullets demonstrating: {take}."]
+            sugg = list(sugg) + list(missing[:5])
         if sugg:
-            for s in sugg[:8]:
-                st.write(f"• {s}")
+            st.markdown("Add concrete points demonstrating: ")
+            st.markdown("\n".join(f"- {s}" for s in sugg[:8]))
         else:
             st.write("(none)")
 
     st.divider()
-    st.subheader("✅ Matched")
-    st.write(", ".join(matched) if matched else "(none)")
+    c4, c5= st.columns(2)
+    with c4:
+        st.subheader("✅ Matched")
+        st.write("\n".join([f"- {m}" for m in matched]) if matched else "(none)")
 
-    st.subheader("❌ Missing (from CV vs JD)")
-    st.write(", ".join(missing) if missing else "(none)")
+    with c5:
+        st.subheader("❌ Missing (from your CV)")
+        st.write("\n".join([f"- {m}" for m in missing]) if missing else "(none)")
 
