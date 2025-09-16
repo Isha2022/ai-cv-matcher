@@ -28,7 +28,7 @@ def extract_skills_ai(text: str, source: str = "cv"):
         )
     else:
         guidance = ("Extract required and preferred capabilities from the job description. "
-            "Infer likely seniority as one of: intern, junior, mid, senior."
+            "Infer likely seniority as one of: intern, junior, mid-level, senior."
         )
     
     # System message - return the info JSON
@@ -47,7 +47,7 @@ def extract_skills_ai(text: str, source: str = "cv"):
             '"suggestions": []'
             "}"
             "Definitions: "
-            "- skills: human capabilities (e.g., accessibility, responsive design, performance optimization)."
+            "- skills: human capabilities (e.g., accessibility, responsive design, performance optimisation)."
             "- tools: named technologies/frameworks (e.g., react, next.js, typescript, figma, mui, mantine, cypress)."
             "- domains: business/industry/problem areas (e.g., frontend web development, it service management, service desk operations, e-commerce, fintech, healthcare, data platforms)."
         ),
@@ -71,15 +71,6 @@ def extract_skills_ai(text: str, source: str = "cv"):
     try:                                                        # Try to convert JSON string into dictionary
         data = json.loads(raw_output)
     except json.JSONDecodeError:
-        # fallback: return empty structure
-        # If wanted add later: try to salavage the json if it included extra text
-        # data = {
-        #     "skills": [],
-        #     "tools": [],
-        #     "domains": [],
-        #     "seniority": "unknown",
-        #     "suggestions": [],
-        # }
         start = raw_output.find("{")
         end = raw_output.rfind("}")
         if start != -1 and end != -1:
@@ -212,9 +203,9 @@ with col1:
 with col2:
     jd_text = st.text_area("Paste the Job Description", height=260, placeholder="Paste the job posting text here.")
 
-analyze = st.button("Analyze", type="primary")
+analyse = st.button("Analyse", type="primary")
 
-if analyze:
+if analyse:
     if not cv_text.strip() or not jd_text.strip():
         st.warning("Please paste both CV and Job Description text.")
         st.stop()
