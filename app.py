@@ -6,6 +6,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import json
 from typing import Dict, Set, Tuple, List
+from PyPDF2 import PdfReader
+
 
 
 # Load API key
@@ -16,6 +18,18 @@ client = OpenAI(api_key=api_key)
 st.set_page_config(page_title="CV ↔ JD Matcher", layout="wide")
 st.title("CV ↔ Job Description Matcher (MVP)")
 st.caption("Paste your CV and a Job Description. The app extracts skills/tools and shows the overlap.")
+
+# Function to read and extract the text in the cv / jd pdf
+def read_extract_pdf(given_pdf) -> str:
+    try:
+        reader = PdfReader(given_pdf)
+        contents = []
+        for page in reader.pages:
+            contents.append(page.extract_text() or "")
+        return "\n".join(contents).strip()
+    except Exception as e:
+        return f""
+
 
 # Function to extract skills/tools/domain/seniority, default source to "CV"
 def extract_skills_ai(text: str, source: str = "cv"):
@@ -197,17 +211,39 @@ def compute_match(cv: Dict, jd: Dict) -> Tuple[float, List[str], List[str]]:
 
 
 # --- UI ---
+st.markdown("### 1) Provide your inputs (upload a file or paste text)")
 col1, col2 = st.columns(2)
 with col1:
-    cv_text = st.text_area("Paste your CV text", height=260, placeholder="Paste the *text* of your CV here.")
+    st.caption("CV Input")
+    cv_file = st.file_uploader("Upload a CV (.pdf / .docx / .txt)", type=["pdf", "docx", "txt"], key="cv_file")
+    cv_text_area = st.text_area("…or paste your CV text", height=200, key="cv_text_area")
 with col2:
-    jd_text = st.text_area("Paste the Job Description", height=260, placeholder="Paste the job posting text here.")
+    st.caption("Job Description Input")
+    jd_file = st.file_uploader("Upload JD (.pdf / .docx / .txt)", type=["pdf", "docx", "txt"], key="jd_file")
+    jd_text_area = st.text_area("…or paste the JD text", height=200, key="jd_text_area")
+
+# Extract text if files were uploaded, or use text
+def get_text_from_input(uploaded_file, given_text: str, label: str) -> str:
+    text = "" 
+    if uploaded_file is not None:
+        name = uploaded_file.name.lower()
+        if name.endswith(".pdf"):
+            text = read_extract_pdf(uploaded_file)
+            if not text:
+                st.warning(f"Couldn’t extract text from {label} PDF. Try exporting as text-based PDF or paste the text.")
+    if not text:
+        text = given_text.strip()
+    
+    return text
+
+cv_text = get_text_from_input(cv_file, cv_text_area, "CV")
+jd_text = get_text_from_input(jd_file, jd_text_area, "JD")
 
 analyse = st.button("Analyse", type="primary")
 
 if analyse:
-    if not cv_text.strip() or not jd_text.strip():
-        st.warning("Please paste both CV and Job Description text.")
+    if not cv_text or not jd_text:
+        st.warning("Please paste both CV and Job Description (upload file or paste text)")
         st.stop()
 
     with st.spinner("Extracting capabilities with AI..."):
