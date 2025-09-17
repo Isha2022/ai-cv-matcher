@@ -1,21 +1,22 @@
 # CV ↔ Job Description Matcher
 
-An AI-powered web application that compares the given CV against a job description, highlights matched and missing skills/tools, and provides suggestions for improvement + **a match % score**.
+An AI-powered web application that compares the given CV against a job description, highlights matched and missing skills/tools, and provides suggestions for improvement + a **match % score**.
 
 🚀 [[Try it live on Streamlit Cloud]](https://isha2022-ai-cv-matcher-app-robbvj.streamlit.app/)
 
 ---
-## 🛠️ Tech Stack
+## ☑️ Tech Stack
 - **Python 3.10+**
 - [Streamlit](https://streamlit.io/) – front-end UI
 - [OpenAI GPT-3.5](https://platform.openai.com/) – skill extraction
-- [spaCy](https://spacy.io/) – NLP basic version ? 
+- [spaCy](https://spacy.io/) – fallback NLP for simple keyword extraction 
 
 ---
-## How To Run
+## ☑️ How To Run
 
 1. **Clone this repo**
-  And navigate to the directory
+
+      And navigate to the directory
 2. **Create virtual environment & Install dependencies**
 ```
   python -m venv .venv
@@ -31,5 +32,16 @@ An AI-powered web application that compares the given CV against a job descripti
 ```
   streamlit run app.py
 ```
+
+---
+## ☑️ Future Features
+
+This project is a work in progress, and I will be adding more features soon.
+- [ ] File upload support for PDF/DOCX ✅
+- [ ] Export results as PDF/Markdown report
+- [ ] Support for multiple CV versions/comparisons
+- [ ] Broader domain adaptation (non-CS industries)
+
+... and more :)
 
 
