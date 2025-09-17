@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 import json
 from typing import Dict, Set, Tuple, List
 from PyPDF2 import PdfReader
-
+import docx
+import io
 
 
 # Load API key
@@ -28,8 +29,25 @@ def read_extract_pdf(given_pdf) -> str:
             contents.append(page.extract_text() or "")
         return "\n".join(contents).strip()
     except Exception as e:
-        return f""
+        return ""
 
+# Function to read and extract the text in the cv / jd .docx. Handles paras & tables
+def read_extract_docx(given_docx) -> str:
+    try:
+        file_bytes = given_docx.read()
+        # Re-wrap bytes so python-docx can read them multiple times if needed
+        memfile = io.BytesIO(file_bytes)
+        document = docx.Document(memfile)
+        contents = []
+        for para in document.paragraphs:
+            contents.append(para.text)
+        # Table text
+        for table in document.tables:
+            for row in table.rows:
+                contents.append("  ".join(cell.text for cell in row.cells))
+        return "\n".join(p.strip() for p in contents if p is not None).strip()
+    except Exception:
+        return ""
 
 # Function to extract skills/tools/domain/seniority, default source to "CV"
 def extract_skills_ai(text: str, source: str = "cv"):
@@ -231,6 +249,17 @@ def get_text_from_input(uploaded_file, given_text: str, label: str) -> str:
             text = read_extract_pdf(uploaded_file)
             if not text:
                 st.warning(f"Couldn’t extract text from {label} PDF. Try exporting as text-based PDF or paste the text.")
+        elif name.endswith(".docx"):
+            text = read_extract_docx(uploaded_file)
+            if not text:
+                st.warning(f"Couldn’t extract text from {label} DOCX. Try copy pasting the text instead.")
+        elif name.endswith(".txt"):
+            try:
+                text = uploaded_file.read().decode("utf-8", errors="ignore")
+            except Exception:
+                st.warning(f"Couldn’t extract text from {label} TXT file. Try copy pasting the text instead.")
+                text = ""
+
     if not text:
         text = given_text.strip()
     
