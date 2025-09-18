@@ -20,7 +20,7 @@ An AI-powered web application that compares the given CV against a job descripti
 2. **Create virtual environment & Install dependencies**
 ```
   python -m venv .venv
-  source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+  source .venv/bin/activate  or .venv\Scripts\activate on Windows
   pip install -r requirements.txt
 ```
 3. **Add your OpenAI API key**
