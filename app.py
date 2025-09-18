@@ -9,16 +9,31 @@ from typing import Dict, Set, Tuple, List
 from PyPDF2 import PdfReader
 import docx
 import io
+import re
 
 
 # Load API key
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
+# api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 client = OpenAI(api_key=api_key)
 
 st.set_page_config(page_title="CV ↔ JD Matcher", layout="wide")
 st.title("CV ↔ Job Description Matcher (MVP)")
 st.caption("Paste your CV and a Job Description. The app extracts skills/tools and shows the overlap.")
+
+# Redact PII from the text
+def redact_pii(text: str) -> str:
+    # Emails
+    text = re.sub(r"\b[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", "[REDACTED_EMAIL]", text)
+    # Phone numbers
+    text = re.sub(r"(\+?\d[\d\-\s\(\)]{6,}\d)", "[REDACTED_PHONE_NUMBER]", text)
+    # URLs
+    text = re.sub(r"https?://\S+|www\.\S+", "[REDACTED_URL]", text)
+    # LinkedIn/GitHub mentions
+    text = re.sub(r"(linkedin\.com/\S+|github\.com/\S+)", "[REDACTED_PROFILE]", text)
+    
+    return text
 
 # Function to read and extract the text in the cv / jd pdf
 def read_extract_pdf(given_pdf) -> str:
@@ -229,7 +244,11 @@ def compute_match(cv: Dict, jd: Dict) -> Tuple[float, List[str], List[str]]:
 
 
 # --- UI ---
-st.markdown("### 1) Provide your inputs (upload a file or paste text)")
+colA, colB = st.columns(2)
+with colA:
+    st.markdown("### Provide your inputs (upload a file or paste text)")
+with colB:
+    redact = st.toggle("Redact PII", value=True, key=None, help="Redact any personal info (emails, phone numbers, URLs) from the CV before sending to AI model", label_visibility="visible", width="content")
 col1, col2 = st.columns(2)
 with col1:
     st.caption("CV Input")
@@ -274,6 +293,10 @@ if analyse:
     if not cv_text or not jd_text:
         st.warning("Please paste both CV and Job Description (upload file or paste text)")
         st.stop()
+
+    if redact:
+        cv_text = redact_pii(cv_text)
+        st.info("PII has been redacted before sending to AI!")
 
     with st.spinner("Extracting capabilities with AI..."):
         cv_raw = extract_skills_ai(cv_text, source="cv")
